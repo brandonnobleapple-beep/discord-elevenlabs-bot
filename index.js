@@ -18,7 +18,7 @@ const {
 const { ElevenLabsClient } = require("@elevenlabs/elevenlabs-js");
 
 const PORT = process.env.PORT || 3000;
-const VOICE_ID = "PASTE_YOUR_VOICE_ID_HERE";
+const VOICE_ID = "c6SfcYrb2t09NHXiT80T";
 
 const elevenlabs = new ElevenLabsClient({
   apiKey: process.env.ELEVENLABS_API_KEY
