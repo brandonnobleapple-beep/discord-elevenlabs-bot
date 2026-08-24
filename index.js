@@ -48,11 +48,31 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
     if (newState.member?.user.bot) return;
     if (oldState.channelId || !newState.channelId) return;
 
-    const voiceChannel = newState.channel;
+    const memberName =
+      newState.member.displayName ||
+      newState.member.user.username;
 
-    console.log(
-      `${newState.member.displayName} joined ${voiceChannel.name}`
+    console.log(`${memberName} joined ${newState.channel.name}`);
+
+    console.log("Testing ElevenLabs...");
+
+    const audio = await elevenlabs.textToSpeech.convert(
+      "JBFqnCBsd6RMkjVDRZzb",
+      {
+        text: `Hey ${memberName}! Welcome to the voice channel!`,
+        modelId: "eleven_multilingual_v2",
+        outputFormat: "mp3_44100_128"
+      }
     );
+
+    console.log("ElevenLabs returned audio successfully.");
+
+  } catch (error) {
+    console.error("===== ELEVENLABS TEST FAILED =====");
+    console.error(error);
+    console.error("===== END ELEVENLABS TEST =====");
+  }
+});
 
   } catch (error) {
     console.error("Voice state error:", error);
