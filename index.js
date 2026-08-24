@@ -44,7 +44,54 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
       newState.member.displayName ||
       newState.member.user.username;
 
-    console.log(`${memberName} joined ${voiceChannel.name}`);
+    console.log(`JOIN DETECTED: ${memberName} → ${voiceChannel.name}`);
+
+    const connection = joinVoiceChannel({
+      channelId: voiceChannel.id,
+      guildId: voiceChannel.guild.id,
+      adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+      selfDeaf: false
+    });
+
+    console.log("VOICE CONNECTION CREATED");
+
+    const audio = await elevenlabs.textToSpeech.convert(
+      "JBFqnCBsd6RMkjVDRZzb",
+      {
+        text: `Hey ${memberName}! Welcome to the voice channel!`,
+        modelId: "eleven_multilingual_v2",
+        outputFormat: "mp3_44100_128"
+      }
+    );
+
+    console.log("ELEVENLABS AUDIO GENERATED");
+
+    const chunks = [];
+
+    for await (const chunk of audio) {
+      chunks.push(chunk);
+    }
+
+    const audioBuffer = Buffer.concat(chunks);
+
+    console.log(`AUDIO BUFFER: ${audioBuffer.length} bytes`);
+
+    const player = createAudioPlayer();
+
+    const resource = createAudioResource(audioBuffer, {
+      inputType: StreamType.Arbitrary
+    });
+
+    connection.subscribe(player);
+
+    player.play(resource);
+
+    console.log("AUDIO PLAYER STARTED");
+
+  } catch (error) {
+    console.error("VOICE AUDIO ERROR:", error);
+  }
+});
 
     // Join the voice channel
     const connection = joinVoiceChannel({
