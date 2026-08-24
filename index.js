@@ -1,4 +1,11 @@
 console.log("STARTING DISCORD ELEVENLABS BOT");
+process.on("uncaughtException", (error) => {
+  console.error("UNCAUGHT EXCEPTION:", error);
+});
+
+process.on("unhandledRejection", (error) => {
+  console.error("UNHANDLED REJECTION:", error);
+});
 require("dotenv").config();
 
 const http = require("http");
