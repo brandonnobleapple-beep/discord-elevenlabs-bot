@@ -1,3 +1,4 @@
+console.log("STARTING DISCORD ELEVENLABS BOT");
 require("dotenv").config();
 
 const http = require("http");
