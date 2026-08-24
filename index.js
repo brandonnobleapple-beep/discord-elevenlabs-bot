@@ -88,8 +88,34 @@ client.on("messageCreate", async (message) => {
       inputType: StreamType.Arbitrary
     });
 
-    connection.subscribe(player);
-    player.play(resource);
+   const audio = await elevenlabs.textToSpeech.convert(
+  "JBFqnCBsd6RMkjVDRZzb",
+  {
+    text,
+    modelId: "eleven_multilingual_v2",
+    outputFormat: "mp3_44100_128"
+  }
+);
+
+const chunks = [];
+
+for await (const chunk of audio) {
+  chunks.push(chunk);
+}
+
+const audioBuffer = Buffer.concat(chunks);
+
+const player = createAudioPlayer();
+
+const resource = createAudioResource(audioBuffer, {
+  inputType: StreamType.Arbitrary
+});
+
+connection.subscribe(player);
+
+player.play(resource);
+
+console.log("ElevenLabs audio is playing.");
 
     console.log("Playing ElevenLabs audio.");
 
