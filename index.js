@@ -48,6 +48,20 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
     if (newState.member?.user.bot) return;
     if (oldState.channelId || !newState.channelId) return;
 
+    const voiceChannel = newState.channel;
+
+    console.log(
+      `${newState.member.displayName} joined ${voiceChannel.name}`
+    );
+
+  } catch (error) {
+    console.error("Voice state error:", error);
+  }
+});
+  try {
+    if (newState.member?.user.bot) return;
+    if (oldState.channelId || !newState.channelId) return;
+
     const memberName =
       newState.member.displayName ||
       newState.member.user.username;
