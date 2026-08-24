@@ -1,4 +1,9 @@
-require("dotenv").config();
+const {
+  joinVoiceChannel,
+  createAudioPlayer,
+  createAudioResource,
+  StreamType
+} = require("@discordjs/voice");require("dotenv").config();
 
 const http = require("http");
 const {
