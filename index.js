@@ -7,7 +7,11 @@ const {
 } = require("discord.js");
 
 const PORT = process.env.PORT || 10000;
+const { ElevenLabsClient } = require("@elevenlabs/elevenlabs-js");
 
+const elevenlabs = new ElevenLabsClient({
+  apiKey: process.env.ELEVENLABS_API_KEY
+});
 // Render Web Service
 http.createServer((req, res) => {
   res.writeHead(200, { "Content-Type": "text/plain" });
