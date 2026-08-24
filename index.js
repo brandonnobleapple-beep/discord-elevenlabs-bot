@@ -17,9 +17,6 @@ const { ElevenLabsClient } = require("@elevenlabs/elevenlabs-js");
 
 const PORT = process.env.PORT || 10000;
 
-const TEXT_CHANNEL_ID = process.env.TEXT_CHANNEL_ID;
-const VOICE_CHANNEL_ID = process.env.VOICE_CHANNEL_ID;
-
 // Render Web Service health server
 http.createServer((req, res) => {
   res.writeHead(200, { "Content-Type": "text/plain" });
@@ -37,35 +34,35 @@ const elevenlabs = new ElevenLabsClient({
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildVoiceStates
   ]
 });
 
 client.once("ready", () => {
   console.log(`Discord bot online as ${client.user.tag}`);
-  console.log(`Watching text channel: ${TEXT_CHANNEL_ID}`);
-  console.log(`Speaking in voice channel: ${VOICE_CHANNEL_ID}`);
 });
 
-client.on("messageCreate", async (message) => {
+// Someone joins a voice channel
+client.on("voiceStateUpdate", async (oldState, newState) => {
   try {
-    if (message.author.bot) return;
-    if (message.channel.id !== TEXT_CHANNEL_ID) return;
+    // Ignore the bot itself
+    if (newState.member?.user.bot) return;
 
-    const text = message.content.trim();
-    if (!text) return;
+    // Only react when someone goes from no voice channel
+    // to being in a voice channel.
+    if (oldState.channelId || !newState.channelId) return;
 
-    console.log(`Speaking: ${text}`);
+    const voiceChannel = newState.channel;
 
-    const voiceChannel = await client.channels.fetch(VOICE_CHANNEL_ID);
+    if (!voiceChannel) return;
 
-    if (!voiceChannel || !voiceChannel.isVoiceBased()) {
-      console.error("VOICE_CHANNEL_ID is not a valid voice channel.");
-      return;
-    }
+    const memberName =
+      newState.member.displayName ||
+      newState.member.user.username;
 
+    console.log(`${memberName} joined ${voiceChannel.name}`);
+
+    // Join the same voice channel
     const connection = joinVoiceChannel({
       channelId: voiceChannel.id,
       guildId: voiceChannel.guild.id,
@@ -73,54 +70,39 @@ client.on("messageCreate", async (message) => {
       selfDeaf: false
     });
 
+    // Generate greeting with ElevenLabs
     const audio = await elevenlabs.textToSpeech.convert(
       "JBFqnCBsd6RMkjVDRZzb",
       {
-        text,
+        text: `Hey ${memberName}! Welcome to the voice channel!`,
         modelId: "eleven_multilingual_v2",
         outputFormat: "mp3_44100_128"
       }
     );
 
+    // Convert ElevenLabs audio into a Buffer
+    const chunks = [];
+
+    for await (const chunk of audio) {
+      chunks.push(chunk);
+    }
+
+    const audioBuffer = Buffer.concat(chunks);
+
+    // Play audio
     const player = createAudioPlayer();
 
-    const resource = createAudioResource(audio, {
+    const resource = createAudioResource(audioBuffer, {
       inputType: StreamType.Arbitrary
     });
 
-   const audio = await elevenlabs.textToSpeech.convert(
-  "JBFqnCBsd6RMkjVDRZzb",
-  {
-    text,
-    modelId: "eleven_multilingual_v2",
-    outputFormat: "mp3_44100_128"
-  }
-);
+    connection.subscribe(player);
+    player.play(resource);
 
-const chunks = [];
-
-for await (const chunk of audio) {
-  chunks.push(chunk);
-}
-
-const audioBuffer = Buffer.concat(chunks);
-
-const player = createAudioPlayer();
-
-const resource = createAudioResource(audioBuffer, {
-  inputType: StreamType.Arbitrary
-});
-
-connection.subscribe(player);
-
-player.play(resource);
-
-console.log("ElevenLabs audio is playing.");
-
-    console.log("Playing ElevenLabs audio.");
+    console.log(`Greeting ${memberName} with ElevenLabs.`);
 
   } catch (error) {
-    console.error("Speech error:", error);
+    console.error("Voice greeting error:", error);
   }
 });
 
