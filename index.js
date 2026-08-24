@@ -28,17 +28,39 @@ const client = new Client({
   ]
 });
 
-client.once("ready", () => {
-  console.log(`Discord bot online as ${client.user.tag}`);
-});
-
 client.on("voiceStateUpdate", async (oldState, newState) => {
-  if (newState.member?.user.bot) return;
-  if (oldState.channelId || !newState.channelId) return;
+  try {
+    if (newState.member?.user.bot) return;
+    if (oldState.channelId || !newState.channelId) return;
 
-  console.log(
-    `${newState.member.displayName} joined ${newState.channel.name}`
-  );
+    const memberName =
+      newState.member.displayName ||
+      newState.member.user.username;
+
+    console.log(`${memberName} joined ${newState.channel.name}`);
+    console.log("Testing ElevenLabs...");
+
+    const audio = await elevenlabs.textToSpeech.convert(
+      "JBFqnCBsd6RMkjVDRZzb",
+      {
+        text: `Hey ${memberName}! Welcome to the voice channel!`,
+        modelId: "eleven_multilingual_v2",
+        outputFormat: "mp3_44100_128"
+      }
+    );
+
+    let totalBytes = 0;
+
+    for await (const chunk of audio) {
+      totalBytes += chunk.length;
+    }
+
+    console.log(`ElevenLabs generated ${totalBytes} bytes of audio.`);
+
+  } catch (error) {
+    console.error("ELEVENLABS TEST FAILED");
+    console.error(error);
+  }
 });
 
 client.login(process.env.DISCORD_TOKEN);
