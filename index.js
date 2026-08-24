@@ -101,10 +101,13 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
 
     console.log(`Greeting ${memberName} with ElevenLabs.`);
 
-  } catch (error) {
-    console.error("Voice greeting error:", error?.message || error);
-console.error(error?.stack || "");
-  }
+  } } catch (error) {
+  console.error("===== ELEVENLABS ERROR START =====");
+  console.error(JSON.stringify(error, null, 2));
+  console.error(String(error));
+  console.error(error);
+  console.error("===== ELEVENLABS ERROR END =====");
+}
 });
 
 client.login(process.env.DISCORD_TOKEN);
