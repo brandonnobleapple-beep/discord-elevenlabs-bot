@@ -1,7 +1,21 @@
 require("dotenv").config();
 
 const http = require("http");
-const { Client, GatewayIntentBits } = require("discord.js");
+const {
+  Client,
+  GatewayIntentBits
+} = require("discord.js");
+
+const {
+  joinVoiceChannel,
+  createAudioPlayer,
+  createAudioResource,
+  AudioPlayerStatus,
+  VoiceConnectionStatus,
+  entersState
+} = require("@discordjs/voice");
+
+const { ElevenLabsClient } = require("@elevenlabs/elevenlabs-js");
 
 const PORT = process.env.PORT || 10000;
 
@@ -13,7 +27,12 @@ http.createServer((req, res) => {
   console.log(`Web server listening on port ${PORT}`);
 });
 
-// Discord bot
+// ElevenLabs
+const elevenlabs = new ElevenLabsClient({
+  apiKey: process.env.ELEVENLABS_API_KEY
+});
+
+// Discord
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
