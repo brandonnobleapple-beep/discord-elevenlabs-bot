@@ -45,6 +45,20 @@ client.once("ready", () => {
 // Someone joins a voice channel
 client.on("voiceStateUpdate", async (oldState, newState) => {
   try {
+    if (newState.member?.user.bot) return;
+    if (oldState.channelId || !newState.channelId) return;
+
+    const voiceChannel = newState.channel;
+
+    console.log(
+      `${newState.member.displayName} joined ${voiceChannel.name}`
+    );
+
+  } catch (error) {
+    console.error("Voice state error:", error);
+  }
+});
+  try {
     // Ignore the bot itself
     if (newState.member?.user.bot) return;
 
