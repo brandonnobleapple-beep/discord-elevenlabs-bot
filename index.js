@@ -1,3 +1,5 @@
+const TEXT_CHANNEL_ID = process.env.TEXT_CHANNEL_ID;
+const VOICE_CHANNEL_ID = process.env.VOICE_CHANNEL_ID;
 require("dotenv").config();
 
 const http = require("http");
