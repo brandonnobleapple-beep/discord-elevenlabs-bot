@@ -102,7 +102,8 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
     console.log(`Greeting ${memberName} with ElevenLabs.`);
 
   } catch (error) {
-    console.error("Voice greeting error:", error);
+    console.error("Voice greeting error:", error?.message || error);
+console.error(error?.stack || "");
   }
 });
 
