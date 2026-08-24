@@ -33,13 +33,23 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
     if (newState.member?.user.bot) return;
     if (oldState.channelId || !newState.channelId) return;
 
+    const voiceChannel = newState.channel;
+
     const memberName =
       newState.member.displayName ||
       newState.member.user.username;
 
-    console.log(`${memberName} joined ${newState.channel.name}`);
-    console.log("Testing ElevenLabs...");
+    console.log(`${memberName} joined ${voiceChannel.name}`);
 
+    // Join the voice channel
+    const connection = joinVoiceChannel({
+      channelId: voiceChannel.id,
+      guildId: voiceChannel.guild.id,
+      adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+      selfDeaf: false
+    });
+
+    // Generate ElevenLabs audio
     const audio = await elevenlabs.textToSpeech.convert(
       "JBFqnCBsd6RMkjVDRZzb",
       {
@@ -48,6 +58,35 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
         outputFormat: "mp3_44100_128"
       }
     );
+
+    // Collect the MP3 data
+    const chunks = [];
+
+    for await (const chunk of audio) {
+      chunks.push(chunk);
+    }
+
+    const audioBuffer = Buffer.concat(chunks);
+
+    console.log(`Audio received: ${audioBuffer.length} bytes`);
+
+    // Create Discord audio player
+    const player = createAudioPlayer();
+
+    const resource = createAudioResource(audioBuffer, {
+      inputType: StreamType.Arbitrary
+    });
+
+    connection.subscribe(player);
+
+    player.play(resource);
+
+    console.log("Playing ElevenLabs greeting.");
+
+  } catch (error) {
+    console.error("VOICE AUDIO ERROR:", error);
+  }
+});
 
     let totalBytes = 0;
 
